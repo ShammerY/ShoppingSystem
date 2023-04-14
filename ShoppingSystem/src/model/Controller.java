@@ -6,6 +6,9 @@ import java.util.ArrayList;
 import java.io.*;
 public class Controller {
     private ArrayList<Product> products;
+    public Controller(){
+        products = new ArrayList<Product>();
+    }
     public void saveData() throws IOException{
         File file = new File("data.json");
         FileOutputStream fos = new FileOutputStream(file);
@@ -39,6 +42,16 @@ public class Controller {
         }catch(FileNotFoundException ex){
             return "";
         }
+    }
+    public String printList(){
+        String msj = "NAME | PRICE | STOCK | CATEGORY | Sells |";
+        for(Product p : products){
+            msj += "\n"+p.getName()+" : "+p.getPrice()+" : "+p.getStock()+" : "+p.getCategory()+" : "+p.getSells();
+        }
+        return msj;
+    }
+    public void addProduct(Product product){
+        products.add(product);
     }
 
 }

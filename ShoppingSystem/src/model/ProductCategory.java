@@ -2,9 +2,9 @@ package model;
 public enum ProductCategory {
     BOOK,
     ELECTRONIC,
-    ACCESORIY,
+    ACCESSORY,
     FOOD,
-    PAPER,
+    STATIONERY,
     SPORT,
     BEAUTY,
     GAME

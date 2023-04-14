@@ -18,14 +18,17 @@ public class Main {
         controller.loadData();
     }
     private void print(Object t){System.out.println(t);}
-    public void executeProgram(){
+    public void executeProgram() throws IOException {
         print(mainMenu());
         switch(reader.next()){
             case "1":
-
+                print(registerProduct());
+                controller.saveData();
                 executeProgram();
             case "2":
                 executeProgram();
+            case "3":
+                print(controller.printList());
             case "0":
                 System.exit(0);
             default:
@@ -33,10 +36,70 @@ public class Main {
                 executeProgram();
         }
     }
+    private String registerProduct(){
+        print("\n Enter : NAME PRICE STOCK");
+        reader.nextLine();
+        String inf = reader.nextLine();
+        String[] info = inf.split(" ");
+        print("\n Enter Product Category :"+categoryMenu());
+        ProductCategory category = validateCategory();
+        print("\n Enter Description :");
+        reader.nextLine();
+        String description = reader.nextLine();
+
+        controller.addProduct(new Product(info[0],Double.parseDouble(info[1]),Integer.parseInt(info[2]),category,description));
+
+        return "\n Product Registered Successfully";
+    }
+    private ProductCategory validateCategory(){
+        ProductCategory category = null;
+        switch(reader.next()){
+            case "1":
+                category = ProductCategory.BOOK;
+                break;
+            case "2":
+                category = ProductCategory.ELECTRONIC;
+                break;
+            case "3":
+                category = ProductCategory.ACCESSORY;
+                break;
+            case "4":
+                category = ProductCategory.FOOD;
+                break;
+            case "5":
+                category = ProductCategory.STATIONERY;
+                break;
+            case "6":
+                category = ProductCategory.SPORT;
+                break;
+            case "7":
+                category = ProductCategory.BEAUTY;
+                break;
+            case "8":
+                category = ProductCategory.GAME;
+                break;
+            default:
+                print("\n Invalid Option");
+                return null;
+        }
+        return category;
+    }
+    private String categoryMenu(){
+        return  "\n"+
+                "(1) Books\n"+
+                "(2) Electronics\n"+
+                "(3) Clothes & Accessories\n"+
+                "(4) Foods & Beverages\n"+
+                "(5) Paper related Things\n"+
+                "(6) Sports\n"+
+                "(7) Beauty & Self Care\n"+
+                "(8) Games & Toys";
+    }
     private String mainMenu(){
         return  "\n OPTIONS : \n"+
                 "(1) Register Product \n"+
                 "(2) Register Order \n"+
+                "(3) List Products\n"+
                 "(0) Exit Program";
     }
 }
