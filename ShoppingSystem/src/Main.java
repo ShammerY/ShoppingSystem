@@ -1,4 +1,6 @@
 import model.*;
+
+import java.io.IOException;
 import java.util.Scanner;
 public class Main {
     private Scanner reader;
@@ -7,12 +9,12 @@ public class Main {
         reader = new Scanner(System.in);
         controller = new Controller();
     }
-    public static void main(String[] args) {
+    public static void main(String[] args) throws IOException {
         Main main = new Main();
         main.loadData();
         main.executeProgram();
     }
-    private void loadData(){
+    private void loadData() throws IOException {
         controller.loadData();
     }
     private void print(Object t){System.out.println(t);}
