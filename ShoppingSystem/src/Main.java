@@ -1,6 +1,7 @@
 import model.*;
 
 import java.io.IOException;
+import java.util.InputMismatchException;
 import java.util.Scanner;
 public class Main {
     private Scanner reader;
@@ -29,6 +30,10 @@ public class Main {
                 executeProgram();
             case "3":
                 print(controller.printList());
+                executeProgram();
+            case "4":
+                print(searchProduct());
+                executeProgram();
             case "0":
                 System.exit(0);
             default:
@@ -37,19 +42,68 @@ public class Main {
         }
     }
     private String registerProduct(){
-        print("\n Enter : NAME PRICE STOCK");
-        reader.nextLine();
-        String inf = reader.nextLine();
-        String[] info = inf.split(" ");
-        print("\n Enter Product Category :"+categoryMenu());
+        try{
+            print("\n Enter : NAME PRICE STOCK");
+            reader.nextLine();
+            String inf = reader.nextLine();
+            String[] info = inf.split(" ");
+            print("\n Enter Product Category :"+categoryMenu());
+            ProductCategory category = validateCategory();
+            print("\n Enter Description :");
+            reader.nextLine();
+            String description = reader.nextLine();
+            if(category == null){
+                return "\n ERROR : Invalid Input Value";
+            }
+            controller.addProduct(new Product(info[0],Double.parseDouble(info[1]),Integer.parseInt(info[2]),category,description));
+            return "\n Product Registered Successfully";
+        }catch(NumberFormatException ex){
+            return "\n ERROR : INVALID INPUT VALUE";
+        }catch(IndexOutOfBoundsException ex){
+            return "\n ERROR : NOT ENOUGH INPUT VALUES";
+        }
+    }
+    private String searchProduct(){
+        print("\n Search Product by : "+searchOption());
+        switch(reader.next()){
+            case "1":
+                print("\n Enter product NAME :");
+                return controller.searchProductByName(reader.next());
+            case "2":
+                return searchProductByPrice();
+            case "3":
+                return searchProductByCategory();
+            case "4":
+                return searchProductBySells();
+            default:
+                return "\n Invalid option";
+
+        }
+    }
+    private String searchProductByPrice(){
+        try{
+            print("\n Enter product Price :");
+            return controller.searchProductByPrice(reader.nextDouble());
+        }catch(InputMismatchException ex){
+            reader.next();
+            return "\n Invalid Price Value";
+        }
+    }
+    public String searchProductByCategory(){
+        print("\n Enter product CATEGORY : "+categoryMenu());
         ProductCategory category = validateCategory();
-        print("\n Enter Description :");
-        reader.nextLine();
-        String description = reader.nextLine();
+        if(category == null){return "\n Invalid Option";}
+        return controller.searchProductByCategory(category);
+    }
+    public String searchProductBySells(){
+        try{
+            print("\n Enter product SELLS :");
+            return controller.searchProductBySells(reader.nextInt());
+        }catch(InputMismatchException ex){
+            reader.next();
+            return "\n Invalid Sells Value";
+        }
 
-        controller.addProduct(new Product(info[0],Double.parseDouble(info[1]),Integer.parseInt(info[2]),category,description));
-
-        return "\n Product Registered Successfully";
     }
     private ProductCategory validateCategory(){
         ProductCategory category = null;
@@ -78,9 +132,6 @@ public class Main {
             case "8":
                 category = ProductCategory.GAME;
                 break;
-            default:
-                print("\n Invalid Option");
-                return null;
         }
         return category;
     }
@@ -95,11 +146,18 @@ public class Main {
                 "(7) Beauty & Self Care\n"+
                 "(8) Games & Toys";
     }
+    private String searchOption(){
+        return  "\n(1) Name\n"+
+                "(2) Price\n"+
+                "(3) Category\n"+
+                "(4) Sells";
+    }
     private String mainMenu(){
         return  "\n OPTIONS : \n"+
                 "(1) Register Product \n"+
                 "(2) Register Order \n"+
-                "(3) List Products\n"+
+                "(3) List All Products\n"+
+                "(4) Search Product\n"+
                 "(0) Exit Program";
     }
 }

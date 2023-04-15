@@ -43,10 +43,46 @@ public class Controller {
             return "";
         }
     }
+    public String searchProductByName(String name){
+        StringBuilder ms = new StringBuilder();
+        for(Product p:products){
+            if(p.getName().equals(name)){
+                ms.append("\n"+p.getName()+" : $"+p.getPrice()+" : "+p.getStock()+" : "+p.getCategory()+" : "+p.getSells());
+            }
+        }
+        return ms.toString();
+    }
+    public String searchProductByPrice(Double price){
+        StringBuilder msj = new StringBuilder();
+        for(Product p:products){
+            if(p.getPrice() == price){
+                msj.append("\n"+p.getName()+" : $"+p.getPrice()+" : "+p.getStock()+" : "+p.getCategory()+" : "+p.getSells());
+            }
+        }
+        return msj.toString();
+    }
+    public String searchProductByCategory(ProductCategory category){
+        StringBuilder msj = new StringBuilder();
+        for(Product p:products){
+            if(p.getCategory().equals(category)){
+                msj.append("\n"+p.getName()+" : $"+p.getPrice()+" : "+p.getStock()+" : "+p.getCategory()+" : "+p.getSells());
+            }
+        }
+        return msj.toString();
+    }
+    public String searchProductBySells(int sells){
+        StringBuilder msj = new StringBuilder();
+        for(Product p:products){
+            if(p.getSells() == sells){
+                msj.append("\n"+p.getName()+" : $"+p.getPrice()+" : "+p.getStock()+" : "+p.getCategory()+" : "+p.getSells());
+            }
+        }
+        return msj.toString();
+    }
     public String printList(){
         String msj = "NAME | PRICE | STOCK | CATEGORY | Sells |";
         for(Product p : products){
-            msj += "\n"+p.getName()+" : "+p.getPrice()+" : "+p.getStock()+" : "+p.getCategory()+" : "+p.getSells();
+            msj += "\n"+p.getName()+" : $"+p.getPrice()+" : "+p.getStock()+" : "+p.getCategory()+" : "+p.getSells();
         }
         return msj;
     }
