@@ -64,7 +64,7 @@ public class Main {
         }
     }
     private String searchProduct(){
-        print("\n Search Product by : "+searchOption());
+        print("\n Search Product by : "+searchMenu());
         switch(reader.next()){
             case "1":
                 print("\n Enter product NAME :");
@@ -146,7 +146,7 @@ public class Main {
                 "(7) Beauty & Self Care\n"+
                 "(8) Games & Toys";
     }
-    private String searchOption(){
+    private String searchMenu(){
         return  "\n(1) Name\n"+
                 "(2) Price\n"+
                 "(3) Category\n"+

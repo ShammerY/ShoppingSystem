@@ -1,6 +1,6 @@
 package model;
 
-public class Product {
+public class Product implements Comparable<Product>{
 
     private String name;
     private double price;
@@ -47,5 +47,10 @@ public class Product {
 
     public void setSells(int cant) {
         sells = sells + cant;
+    }
+
+    @Override
+    public int compareTo(Product p){
+        return this.name.compareTo(p.getName());
     }
 }
