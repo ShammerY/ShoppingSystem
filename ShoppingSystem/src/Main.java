@@ -12,11 +12,7 @@ public class Main {
     }
     public static void main(String[] args) throws IOException {
         Main main = new Main();
-        main.loadData();
         main.executeProgram();
-    }
-    private void loadData() throws IOException {
-        controller.loadData();
     }
     private void print(Object t){System.out.println(t);}
     public void executeProgram() throws IOException {
@@ -24,22 +20,22 @@ public class Main {
         switch(reader.next()){
             case "1":
                 print(registerProduct());
-                controller.saveData();
-                executeProgram();
+                controller.saveProductData();
+                break;
             case "2":
-                executeProgram();
+                break;
             case "3":
                 print(controller.printList());
-                executeProgram();
+                break;
             case "4":
                 print(searchProduct());
-                executeProgram();
+                break;
             case "0":
                 System.exit(0);
             default:
                 print("\n Invalid Option");
-                executeProgram();
         }
+        executeProgram();
     }
     private String registerProduct(){
         try{
@@ -47,6 +43,9 @@ public class Main {
             reader.nextLine();
             String inf = reader.nextLine();
             String[] info = inf.split(" ");
+            if(!controller.validateAvailableName(info[0])){
+                return "Product has already been registered";
+            }
             print("\n Enter Product Category :"+categoryMenu());
             ProductCategory category = validateCategory();
             print("\n Enter Description :");
@@ -70,41 +69,33 @@ public class Main {
                 print("\n Enter product NAME :");
                 return controller.searchProductByName(reader.next());
             case "2":
-                return searchProductByPrice();
+                print("\n Enter product Price :");
+                try{
+                    return controller.searchProductByPrice(reader.nextDouble());
+                }catch(InputMismatchException ex){
+                    reader.next();
+                    return "\n Invalid Price Value";
+                }
             case "3":
-                return searchProductByCategory();
+                print("\n Enter product CATEGORY : "+categoryMenu());
+                ProductCategory category = validateCategory();
+                if(category == null){return "\n Invalid Option";}
+                return controller.searchProductByCategory(category);
             case "4":
-                return searchProductBySells();
+                print("\n Enter product SELLS :");
+                try{
+                    return controller.searchProductBySells(reader.nextInt());
+                }catch(InputMismatchException ex){
+                    reader.next();
+                    return "\n Invalid Sells Value";
+                }
             default:
                 return "\n Invalid option";
 
         }
     }
-    private String searchProductByPrice(){
-        try{
-            print("\n Enter product Price :");
-            return controller.searchProductByPrice(reader.nextDouble());
-        }catch(InputMismatchException ex){
-            reader.next();
-            return "\n Invalid Price Value";
-        }
-    }
-    public String searchProductByCategory(){
-        print("\n Enter product CATEGORY : "+categoryMenu());
-        ProductCategory category = validateCategory();
-        if(category == null){return "\n Invalid Option";}
-        return controller.searchProductByCategory(category);
-    }
-    public String searchProductBySells(){
-        try{
-            print("\n Enter product SELLS :");
-            return controller.searchProductBySells(reader.nextInt());
-        }catch(InputMismatchException ex){
-            reader.next();
-            return "\n Invalid Sells Value";
-        }
 
-    }
+
     private ProductCategory validateCategory(){
         ProductCategory category = null;
         switch(reader.next()){
