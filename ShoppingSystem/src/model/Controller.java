@@ -17,6 +17,11 @@ public class Controller {
         createDataFile();
         loadProductData();
     }
+    public Product[] getProducts(){
+        Product[] list = new Product[products.size()];
+        list = products.toArray(list);
+        return list;
+    }
     public void saveProductData() throws IOException{
         FileOutputStream fos = new FileOutputStream(productData);
         BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(fos));
@@ -99,10 +104,11 @@ public class Controller {
         }
         return -1;
     }
-    public String searchProductByPrice(double price){
-        StringBuilder msj = new StringBuilder();
-        Product[] list = new Product[products.size()];
-        list = products.toArray(list);
+    public String searchProductByPrice(double iLimit,double sLimit){
+        if(iLimit>sLimit){
+            return "\n Invalid input order";
+        }
+        Product[] list = getProducts();
         Arrays.sort(list,(a,b) ->{
             if((a.getPrice()-b.getPrice())>0){
                 return 1;
@@ -112,30 +118,179 @@ public class Controller {
                 return 0;
             }
         });
-        msj.append("\n NAME | PRICE | STOCK | CATEGORY |\n");
-        try{
-            int pos = binarySearchPrice(price,list);
-            msj.append("\n"+list[pos].getName()+" : $"+list[pos].getPrice()+" : "+list[pos].getStock()+" : "+list[pos].getCategory()+" : "+list[pos].getSells());
-        }catch(IndexOutOfBoundsException ex){
-            return "Product Not Found";
+        int infPos=-1;
+        int supPos=-1;
+        if(iLimit<list[0].getPrice()){
+            infPos = 0;
+        }else{
+            infPos = binarySearchInfPrice(iLimit,list);
         }
-        return msj.toString();
+        if(sLimit>list[list.length-1].getPrice()){
+            supPos = list.length-1;
+        }else{
+            supPos = binarySearchSupPrice(sLimit,list);
+        }
+        if((infPos==-1 || supPos==-1) || (infPos>supPos)){
+        return "\n No products Found...";
+        }
+        list = subString(list,infPos,supPos);
+        return printList(list);
     }
-    private int binarySearchPrice(double price, Product[] array){
+    private int binarySearchInfPrice(double price, Product[] array){
         int begin = 0;
         int end = array.length-1;
+        if(price>array[array.length-1].getPrice()){
+            return -1;
+        }
         while(begin <= end){
             int half = (int)Math.floor((double)(begin+end)/2);
             if((array[half].getPrice() - price)==0){
-                return half;
+                if(half==0 || (array[half-1].getPrice()!=array[half].getPrice())){
+                    return half;
+                }else if(array[half-1].getPrice()==array[half].getPrice()){
+                    end = half-1;
+                }
             }else if((array[half].getPrice() - price)<0){
-                begin = half+1;
-            }else{
-                end = half-1;
+                if(array[half+1].getPrice()>price){
+                    return half+1;
+                }else{
+                    begin = half+1;
+                }
+            }else if((array[half].getPrice() - price)>0){
+                if(array[half-1].getPrice()<price){
+                    return half;
+                }else{
+                    end = half-1;
+                }
             }
         }
-        return -1;
+        return -2;
     }
+    private int binarySearchSupPrice(double price, Product[] array){
+        int begin = 0;
+        int end = array.length-1;
+        if(price<array[0].getPrice()){
+            return -1;
+        }
+        while(begin <= end) {
+            int half = (int)Math.floor((double)(begin+end)/2);
+            if((array[half].getPrice() - price)==0){
+                if(half==(array.length-1) || (array[half+1].getPrice()!=array[half].getPrice())){
+                    return half;
+                }else if(array[half+1].getPrice()==array[half].getPrice()){
+                    begin = half+1;
+                }
+            }else if((array[half].getPrice() - price)<0){
+                if(array[half+1].getPrice()>price){
+                    return half;
+                }else{
+                    begin = half+1;
+                }
+            }else if((array[half].getPrice() - price)>0){
+                if(array[half-1].getPrice()<price){
+                    return half-1;
+                }else{
+                    end = half-1;
+                }
+            }
+        }
+        return -2;
+    }
+
+    public String searchProductByStock(int iLimit,int sLimit){
+        if(iLimit>sLimit){
+            return "\n Invalid input order";
+        }
+        Product[] list = getProducts();
+        Arrays.sort(list,(a,b) ->{
+            if((a.getStock()-b.getStock())>0){
+                return 1;
+            }else if((a.getStock()-b.getStock())<0){
+                return -1;
+            }else{
+                return 0;
+            }
+        });
+        int infPos=-1;
+        int supPos=-1;
+        if(iLimit<list[0].getStock()){
+            infPos = 0;
+        }else{
+            infPos = binarySearchInfStock(iLimit,list);
+        }
+        if(sLimit>list[list.length-1].getStock()){
+            supPos = list.length-1;
+        }else{
+            supPos = binarySearchSupStock(sLimit,list);
+        }
+        if((infPos==-1 || supPos==-1) || (infPos>supPos)){
+            return "\n No products Found...";
+        }
+        list = subString(list,infPos,supPos);
+        return printList(list);
+    }
+    private int binarySearchInfStock(int stock, Product[] array){
+        int begin = 0;
+        int end = array.length-1;
+        if(stock>array[array.length-1].getStock()){
+            return -1;
+        }
+        while(begin <= end){
+            int half = (int)Math.floor((double)(begin+end)/2);
+            if((array[half].getStock() - stock)==0){
+                if(half==0 || (array[half-1].getStock()!=array[half].getStock())){
+                    return half;
+                }else if(array[half-1].getStock()==array[half].getStock()){
+                    end = half-1;
+                }
+            }else if((array[half].getStock() - stock)<0){
+                if(array[half+1].getStock()>stock){
+                    return half+1;
+                }else{
+                    begin = half+1;
+                }
+            }else if((array[half].getStock() - stock)>0){
+                if(array[half-1].getStock()<stock){
+                    return half;
+                }else{
+                    end = half-1;
+                }
+            }
+        }
+        return -2;
+    }
+    private int binarySearchSupStock(int stock, Product[] array){
+        int begin = 0;
+        int end = array.length-1;
+        if(stock<array[0].getStock()){
+            return -1;
+        }
+        while(begin <= end) {
+            int half = (int)Math.floor((double)(begin+end)/2);
+            if((array[half].getStock() - stock)==0){
+                if(half==(array.length-1) || (array[half+1].getStock()!=array[half].getStock())){
+                    return half;
+                }else if(array[half+1].getStock()==array[half].getStock()){
+                    begin = half+1;
+                }
+            }else if((array[half].getStock() - stock)<0){
+                if(array[half+1].getStock()>stock){
+                    return half;
+                }else{
+                    begin = half+1;
+                }
+            }else if((array[half].getStock() - stock)>0){
+                if(array[half-1].getStock()<stock){
+                    return half-1;
+                }else{
+                    end = half-1;
+                }
+            }
+        }
+        return -2;
+    }
+
+
     public String searchProductByCategory(ProductCategory category){
         StringBuilder msj = new StringBuilder();
         for(Product p:products){
@@ -182,16 +337,99 @@ public class Controller {
         }
         return -1;
     }
-    public String printList(){
+    public String printList(Product[] list){
         StringBuilder msj = new StringBuilder();
-        msj.append("NAME | PRICE | STOCK | CATEGORY | Sells |");
-        for(Product p : products){
-            msj.append("\n"+p.getName()+" : $"+p.getPrice()+" : "+p.getStock()+" : "+p.getCategory()+" : "+p.getSells());
+        int[] sep = calculateSeparations(list);
+        String[] inf = new String[5];
+        msj.append("\n|   NAME   |  PRICE  |  STOCK  |  CATEGORY  |  Sells  |\n");
+        for(Product p : list){
+            inf = addSeparation(p,sep);
+            msj.append("\n"+inf[0]+" : $"+inf[1]+" : "+inf[2]+" : "+inf[3]+" : "+inf[4]);
         }
+        msj.append("\n\n FOUND "+list.length+" ITEMS");
         return msj.toString();
+    }
+    private int[] calculateSeparations(Product[] list){
+        int[] sep = new int[5];
+        int maxName = 0;
+        int maxPrice = 0;
+        int maxStock = 0;
+        int maxSells = 0;
+        int maxCategory = 0;
+        for(Product p:list){
+            int length = p.getName().split("").length;
+            if(maxName<length){maxName = length;}
+            String value = ""+p.getPrice();
+            length = value.split("").length;
+            if(maxPrice<length){maxPrice = length;}
+            value = ""+p.getStock();
+            length = value.split("").length;
+            if(maxStock<length){maxStock = length;}
+            value = ""+p.getSells();
+            length = value.split("").length;
+            if(maxSells<length){maxSells = length;}
+            value = ""+p.getCategory();
+            length = value.split("").length;
+            if(maxCategory<length){maxCategory = length;}
+        }
+        sep[0] = maxName;
+        sep[1] = maxPrice;
+        sep[2] = maxStock;
+        sep[4] = maxSells;
+        sep[3] = maxCategory;
+        return sep;
+    }
+    private String[] addSeparation(Product p, int[] sep){
+        String[] inf = new String[5];
+        inf[0] = p.getName();
+        inf[1] = ""+p.getPrice();
+        inf[2] = ""+p.getStock();
+        inf[3] = ""+p.getCategory();
+        inf[4] = ""+p.getSells();
+        int len = inf[0].split("").length;
+        int separation = sep[0]-len;
+        for(int i=0;i<separation;i++){
+            inf[0] += " ";
+        }
+        len = inf[1].split("").length;
+        separation = sep[1] -len;
+        for(int i=0;i<separation;i++){
+            inf[1] += " ";
+        }
+        len = inf[2].split("").length;
+        separation = sep[2] -len;
+        for(int i=0;i<separation;i++){
+            inf[2] += " ";
+        }
+        len = inf[3].split("").length;
+        separation = sep[3] -len;
+        for(int i=0;i<separation;i++){
+            inf[3] += " ";
+        }
+        len = inf[4].split("").length;
+        separation = sep[4] -len;
+        for(int i=0;i<separation;i++){
+            inf[4] += " ";
+        }
+        return inf;
+    }
+    private Product[] subString(Product[] list,int inf,int sup){
+        Product[] array = new Product[(sup-inf)+1];
+        int cont = 0;
+        for(int i=inf;i<=sup;i++){
+            array[cont] = list[i];
+            cont++;
+        }
+        return array;
     }
     public void addProduct(Product product){
         products.add(product);
     }
-
+    public void deleteProduct(String name){
+        for(int i=0;i<products.size();i++){
+            if((products.get(i).getName().compareToIgnoreCase(name))==0){
+                products.remove(i);
+            }
+        }
+    }
 }
