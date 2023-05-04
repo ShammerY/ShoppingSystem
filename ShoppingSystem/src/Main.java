@@ -1,7 +1,9 @@
 import model.*;
 
 import java.io.IOException;
-import java.util.InputMismatchException;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Date;
 import java.util.Scanner;
 public class Main {
     private Scanner reader;
@@ -28,6 +30,7 @@ public class Main {
                 controller.saveProductData();
                 break;
             case "2":
+                registerOrder();
                 break;
             case "3":
                 print(controller.printList(controller.getProducts()));
@@ -44,7 +47,7 @@ public class Main {
             default:
                 print("\n Invalid Option");
         }
-        clearScanner();
+        //clearScanner();
         executeProgram();
     }
     private String registerProduct(){
@@ -74,6 +77,57 @@ public class Main {
                     "Product::5::12";
         }
     }
+    private void registerOrder() throws IOException {
+        print("\n Enter Customer Name: ");
+        reader.nextLine();
+        String customerName = reader.nextLine();
+        Product[] list = controller.getProducts();
+        ArrayList<Product> customerList = new ArrayList<>();
+        String option;
+        do {
+            print(registerOrderMenu());
+            option = reader.next();
+            switch(option){
+                case "1":
+                    Arrays.sort(list,(a,b)->{
+                        return a.getName().compareTo(b.getName());
+                    });
+                    customerList = addProductToList(list,customerList);
+                    break;
+                case "2":
+                    print(searchProduct());
+                    break;
+                case "3":
+                    try{
+                        controller.addOrder(customerName,customerList,new Date());
+                        controller.saveOrderData();
+                    }catch(NullPointerException ex){
+                        print("\n Order Discarted");
+                    }
+                    print("Order Registered");
+                    break;
+                case "0":
+                    print("Order Discarded");
+                    break;
+                default:
+                    print("\n Invalid Option");
+            }
+        }while(!option.equals("3"));
+    }
+    private ArrayList<Product> addProductToList(Product[] list, ArrayList<Product> customerList){
+        print("Enter Product Name");
+        int pos = controller.binarySearchName(reader.next(),list);
+        if(pos==-1){
+            print("\nProduct Not Found");
+            return customerList;
+        }else if(list[pos].getStock()<1){
+            print("\nProduct is out of stock");
+            return customerList;
+        }
+        customerList.add(list[pos]);
+        controller.setProductSellsAndStock(list[pos]);
+        return customerList;
+    }
     private String deleteProduct(){
         print("\n Enter NAME :");
         String name = reader.next();
@@ -99,13 +153,7 @@ public class Main {
             case "4":
                 return searchProductByStock();
             case "5":
-                print("\n Enter product SELLS :");
-                try{
-                    return controller.searchProductBySells(reader.nextInt());
-                }catch(InputMismatchException ex){
-                    reader.next();
-                    return "\n Invalid Sells Value";
-                }
+                return searchProductBySells();
             default:
                 return "\n Invalid option";
 
@@ -147,8 +195,24 @@ public class Main {
             return "\n Invalid Stock Value\n\nFormat Example:\n 2::10";
         }
     }
+    private String searchProductBySells(){
+        print("\n Enter Sells : \n\nfor ranged search -> (Inferior Limit)::(Superior Limit)");
+        String[] input = reader.next().split("::");
+        int[] limits = new int[2];
+        try{
+            if(input.length==1){
+                limits[0] = Integer.parseInt(input[0]);
+                limits[1] = limits[0];
+            }else{
+                limits[0] = Integer.parseInt(input[0]);
+                limits[1] = Integer.parseInt(input[1]);
+            }
 
-
+            return controller.searchProductBySells(limits[0],limits[1]);
+        }catch(NumberFormatException ex){
+            return "\n Invalid Sells Value\n\nFormat Example:\n 2::10";
+        }
+    }
     private ProductCategory validateCategory(){
         ProductCategory category = null;
         switch(reader.next()){
@@ -196,6 +260,12 @@ public class Main {
                 "(3) Category\n"+
                 "(4) Available Stock\n"+
                 "(5) Sells";
+    }
+    private String registerOrderMenu(){
+        return  "\n(1) Add Product"+
+                "\n(2) Search Products"+
+                "\n(3) Save Order"+
+                "\n(0) Discard Order";
     }
     private String mainMenu(){
         return  "\n OPTIONS : \n"+

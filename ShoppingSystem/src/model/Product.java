@@ -42,11 +42,11 @@ public class Product implements Comparable<Product>{
     }
 
     public void setStock(int cant) {
-        stock = stock - cant;
+        stock -= cant;
     }
 
     public void setSells(int cant) {
-        sells = sells + cant;
+        sells += cant;
     }
 
     @Override

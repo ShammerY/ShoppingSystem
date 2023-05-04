@@ -7,15 +7,18 @@ import java.util.ArrayList;
 import java.io.*;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.Date;
 
 public class Controller {
     private File productData;
     private File orderData;
     private ArrayList<Product> products;
+    private ArrayList<Order> orders;
     public Controller(){
         products = new ArrayList<>();
         createDataFile();
         loadProductData();
+        loadOrderData();
     }
     public Product[] getProducts(){
         Product[] list = new Product[products.size()];
@@ -33,6 +36,17 @@ public class Controller {
         writer.flush();
         fos.close();
 
+    }
+    public void saveOrderData() throws IOException{
+        FileOutputStream fos = new FileOutputStream(orderData);
+        BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(fos));
+
+        Gson gson = new Gson();
+        String data = gson.toJson(orders);
+
+        writer.write(data);
+        writer.flush();
+        fos.close();
     }
     private void createDataFile(){
         File path = new File(System.getProperty("user.dir")+"/data");
@@ -59,6 +73,23 @@ public class Controller {
             }
         }catch(Exception ex){}
     }
+    public void loadOrderData(){
+        try{
+            FileInputStream fis = new FileInputStream(orderData);
+            BufferedReader reader = new BufferedReader(new InputStreamReader(fis));
+            String line;
+            StringBuilder content = new StringBuilder();
+            while((line = reader.readLine())!=null){
+                content.append(line);
+            }
+            Gson gson = new Gson();
+            Order[] list = gson.fromJson(content.toString(),Order[].class);
+            fis.close();
+            for(Order p:list){
+                orders.add(p);
+            }
+        }catch(Exception ex){}
+    }
     public boolean validateAvailableName(String name){
         Product[] list = new Product[products.size()];
         list = products.toArray(list);
@@ -70,6 +101,10 @@ public class Controller {
         }else{
             return false;
         }
+    }
+    public void setProductSellsAndStock(Product product){
+        product.setSells(1);
+        product.setStock(1);
     }
     public String searchProductByName(String name){
         StringBuilder msj = new StringBuilder();
@@ -89,7 +124,7 @@ public class Controller {
         }
 
     }
-    private int binarySearchName(String name, Product[] array){
+    public int binarySearchName(String name, Product[] array){
         int begin = 0;
         int end = array.length-1;
         while(begin <= end){
@@ -196,7 +231,6 @@ public class Controller {
         }
         return -2;
     }
-
     public String searchProductByStock(int iLimit,int sLimit){
         if(iLimit>sLimit){
             return "\n Invalid input order";
@@ -289,8 +323,6 @@ public class Controller {
         }
         return -2;
     }
-
-
     public String searchProductByCategory(ProductCategory category){
         StringBuilder msj = new StringBuilder();
         for(Product p:products){
@@ -300,11 +332,12 @@ public class Controller {
         }
         return msj.toString();
     }
-    public String searchProductBySells(int sells){
-        StringBuilder msj = new StringBuilder();
-        Product[] list = new Product[products.size()];
-        list = products.toArray(list);
-        Arrays.sort(list,(a,b) -> {
+    public String searchProductBySells(int iLimit,int sLimit){
+        if(iLimit>sLimit){
+            return "\n Invalid input order";
+        }
+        Product[] list = getProducts();
+        Arrays.sort(list,(a,b) ->{
             if((a.getSells()-b.getSells())>0){
                 return 1;
             }else if((a.getSells()-b.getSells())<0){
@@ -313,29 +346,83 @@ public class Controller {
                 return 0;
             }
         });
-        msj.append("NAME | PRICE | STOCK | CATEGORY | Sells |");
-        try{
-            int pos = binarySearchSells(sells,list);
-            msj.append("\n"+list[pos].getName()+" : $"+list[pos].getPrice()+" : "+list[pos].getStock()+" : "+list[pos].getCategory()+" : "+list[pos].getSells());
-        }catch(IndexOutOfBoundsException ex){
-            return "Product Not Found";
+        int infPos=-1;
+        int supPos=-1;
+        if(iLimit<list[0].getSells()){
+            infPos = 0;
+        }else{
+            infPos = binarySearchInfSells(iLimit,list);
         }
-        return msj.toString();
+        if(sLimit>list[list.length-1].getSells()){
+            supPos = list.length-1;
+        }else{
+            supPos = binarySearchSupSells(sLimit,list);
+        }
+        if((infPos==-1 || supPos==-1) || (infPos>supPos)){
+            return "\n No products Found...";
+        }
+        list = subString(list,infPos,supPos);
+        return printList(list);
     }
-    private int binarySearchSells(int sells,Product[] array){
+    private int binarySearchInfSells(int sells, Product[] array){
         int begin = 0;
         int end = array.length-1;
+        if(sells>array[array.length-1].getSells()){
+            return -1;
+        }
         while(begin <= end){
             int half = (int)Math.floor((double)(begin+end)/2);
             if((array[half].getSells() - sells)==0){
-                return half;
+                if(half==0 || (array[half-1].getSells()!=array[half].getSells())){
+                    return half;
+                }else if(array[half-1].getSells()==array[half].getSells()){
+                    end = half-1;
+                }
             }else if((array[half].getSells() - sells)<0){
-                begin = half+1;
-            }else{
-                end = half-1;
+                if(array[half+1].getSells()>sells){
+                    return half+1;
+                }else{
+                    begin = half+1;
+                }
+            }else if((array[half].getSells() - sells)>0){
+                if(array[half-1].getSells()<sells){
+                    return half;
+                }else{
+                    end = half-1;
+                }
             }
         }
-        return -1;
+        return -2;
+    }
+    private int binarySearchSupSells(int sells, Product[] array){
+        int begin = 0;
+        int end = array.length-1;
+        if(sells<array[0].getSells()){
+            return -1;
+        }
+        while(begin <= end) {
+            int half = (int)Math.floor((double)(begin+end)/2);
+            if((array[half].getSells() - sells)==0){
+                if(half==(array.length-1) || (array[half+1].getSells()!=array[half].getSells())){
+                    return half;
+                }else if(array[half+1].getSells()==array[half].getSells()){
+                    begin = half+1;
+                }
+            }else if((array[half].getSells() - sells)<0){
+                if(array[half+1].getSells()>sells){
+                    return half;
+                }else{
+                    begin = half+1;
+                }
+            }else if((array[half].getSells() - sells)>0){
+                if(array[half-1].getSells()<sells){
+                    return half-1;
+                }else{
+                    end = half-1;
+                }
+            }
+        }
+        return -2;
     }
     public String printList(Product[] list){
         StringBuilder msj = new StringBuilder();
@@ -432,4 +519,10 @@ public class Controller {
             }
         }
     }
-}
+    public void addOrder(String customerName,ArrayList<Product> list, Date date){
+        orders.add(new Order(customerName,list,date));
+        for(Product p:list){
+
+        }
+    }
+ }
