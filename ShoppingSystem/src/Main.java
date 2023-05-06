@@ -99,9 +99,11 @@ public class Main {
                     break;
                 case "3":
                     try{
-                        controller.addOrder(customerName,customerList,new Date());
+                        controller.addOrder(new Order(customerName,customerList,new Date()));
                         controller.saveOrderData();
+                        controller.saveProductData();
                     }catch(NullPointerException ex){
+                        ex.printStackTrace();
                         print("\n Order Discarted");
                     }
                     print("Order Registered");

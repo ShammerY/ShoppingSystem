@@ -1,0 +1,1 @@
+[{"customerName":"Lancelot","products":[{"name":"Roomba","price":92.99,"description":"Dont let the cat on...","stock":29,"category":"ELECTRONIC","sells":9},{"name":"Basketball","price":25.0,"description":"Ball to play","stock":39,"category":"SPORT","sells":1}],"date":"May 4, 2023, 8:50:00 AM","value":117.99}]

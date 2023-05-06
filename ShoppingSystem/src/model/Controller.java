@@ -16,6 +16,7 @@ public class Controller {
     private ArrayList<Order> orders;
     public Controller(){
         products = new ArrayList<>();
+        orders = new ArrayList<>();
         createDataFile();
         loadProductData();
         loadOrderData();
@@ -23,6 +24,11 @@ public class Controller {
     public Product[] getProducts(){
         Product[] list = new Product[products.size()];
         list = products.toArray(list);
+        return list;
+    }
+    public Order[] getOrders(){
+        Order[] list = new Order[orders.size()];
+        list = orders.toArray(list);
         return list;
     }
     public void saveProductData() throws IOException{
@@ -166,7 +172,7 @@ public class Controller {
             supPos = binarySearchSupPrice(sLimit,list);
         }
         if((infPos==-1 || supPos==-1) || (infPos>supPos)){
-        return "\n No products Found...";
+            return "No Product Found...";
         }
         list = subString(list,infPos,supPos);
         return printList(list);
@@ -519,10 +525,7 @@ public class Controller {
             }
         }
     }
-    public void addOrder(String customerName,ArrayList<Product> list, Date date){
-        orders.add(new Order(customerName,list,date));
-        for(Product p:list){
-
-        }
+    public void addOrder(Order order){
+        orders.add(order);
     }
  }
