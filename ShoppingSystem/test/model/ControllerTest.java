@@ -69,4 +69,15 @@ public class ControllerTest {
         }
         assertFalse(flag);
     }
+    @Test
+    public void test(){
+        String a = "hola";
+        Integer b = 33;
+        Boolean c = false;
+        Product product = new Product("P",1,1,ProductCategory.BOOK,"");
+        System.out.println(a.getClass());
+        System.out.println(b.getClass());
+        System.out.println(c.getClass());
+        System.out.println(product.getClass());
+    }
 }

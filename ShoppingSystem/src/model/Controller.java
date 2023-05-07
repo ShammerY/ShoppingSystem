@@ -113,22 +113,34 @@ public class Controller {
         product.setStock(1);
     }
     public String searchProductByName(String name){
-        StringBuilder msj = new StringBuilder();
+        Product[] list = makeProductListByName(name);
+        if(list[0]==null){return "\n No products Found...";}
+        return printList(list);
+    }
+    private Product[] makeProductListByName(String name){
         Product[] list = new Product[products.size()];
-        list = products.toArray(list);
-        msj.append("\n NAME | PRICE | STOCK | CATEGORY |\n");
-        Arrays.sort(list,(a, b) -> {
-            int criteria = a.getName().compareTo(b.getName());
-            return criteria;
-        });
-        try{
-            int pos = binarySearchName(name,list);
-            msj.append("\n"+list[pos].getName()+" : $"+list[pos].getPrice()+" : "+list[pos].getStock()+" : "+list[pos].getCategory()+" : "+list[pos].getSells());
-            return msj.toString();
-        }catch(IndexOutOfBoundsException ex){
-            return "Product Not Found";
+        int len = name.split("").length;
+        int cont = 0;
+        String startName = "";
+        String endName = "";
+        for(int i=0;i<products.size();i++){
+            String productName = products.get(i).getName();
+            if(productName.split("").length>=len){
+                startName = productName.substring(0,len);
+                endName = productName.substring(productName.split("").length-len,productName.split("").length);
+                if(startName.equalsIgnoreCase(name)){
+                    list[cont] = products.get(i);
+                    cont++;
+                }else if(endName.equalsIgnoreCase(name)){
+                    list[cont] = products.get(i);
+                    cont++;
+                }
+            }
         }
-
+        if(cont>0){
+            list = subString(list,0,cont-1);
+        }
+        return list;
     }
     public int binarySearchName(String name, Product[] array){
         int begin = 0;
