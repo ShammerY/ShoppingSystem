@@ -16,6 +16,8 @@ public class Controller {
     public Controller(){
         products = new ArrayList<>();
         orders = new ArrayList<>();
+    }
+    public void loadArchive(){
         createDataFile();
         loadProductData();
         loadOrderData();
@@ -107,13 +109,29 @@ public class Controller {
             return false;
         }
     }
+
+    /**
+     * name : setProductSellsAndStock
+     * To increase the sells amount and decrease product stock, each time an order is registered
+     * @param product : product which will be setted.
+     */
     public void setProductSellsAndStock(Product product){
         product.setSells(1);
         product.setStock(-1);
     }
+
+    /**
+     * searchProductByName: returns a list of the products that resembles the name entered by the user
+     * @param name: name to evaluate the product
+     */
     public Product[] searchProductByName(String name){
         return makeProductListByName(name);
     }
+
+    /**
+     * makeProductListByName: returns list evaluated products with the name entered;
+     * @param name: name to evaluate products;
+     */
     private Product[] makeProductListByName(String name){
         Product[] list = new Product[products.size()];
         int len = name.split("").length;
@@ -135,12 +153,18 @@ public class Controller {
             }
         }
         if(cont>0){
-            list = subString(list,0,cont-1);
+            list = subStringList(list,0,cont-1);
         }else{
             return null;
         }
         return list;
     }
+
+    /**
+     * binarySearchName: returns the exact possition of a product in the list by its name
+     * @param name: String name to evaluate the product
+     * @param array: list to search the possible product
+     */
     public int binarySearchName(String name, Product[] array){
         int begin = 0;
         int end = array.length-1;
@@ -156,6 +180,12 @@ public class Controller {
         }
         return -1;
     }
+
+    /**
+     * searchProductByPrice: returns a list with the products which corresponds to the range entered
+     * @param iLimit : Inferior limir of the range
+     * @param sLimit : Superior limit of the range
+     */
     public Product[] searchProductByPrice(double iLimit,double sLimit){
         if(iLimit>sLimit){
             return null;
@@ -185,9 +215,15 @@ public class Controller {
         if((infPos==-1 || supPos==-1) || (infPos>supPos)){
             return null;
         }
-        list = subString(list,infPos,supPos);
+        list = subStringList(list,infPos,supPos);
         return list;
     }
+
+    /**
+     * binarySearchInfPrice: searches for the possition of the product with the least price indicated
+     * @param price: value of the inferior price
+     * @param array: list to search the product
+     */
     private int binarySearchInfPrice(double price, Product[] array){
         int begin = 0;
         int end = array.length-1;
@@ -218,6 +254,11 @@ public class Controller {
         }
         return -2;
     }
+    /**
+     * binarySearchSupPrice: searches for the possition of the product with the highest price indicated
+     * @param price: value of the Superior price
+     * @param array: list to search the product
+     */
     private int binarySearchSupPrice(double price, Product[] array){
         int begin = 0;
         int end = array.length-1;
@@ -248,6 +289,12 @@ public class Controller {
         }
         return -2;
     }
+
+    /**
+     * searchProductByStock: returns the list with the products that correspond to the stock range entered
+     * @param iLimit :inferior limit of the range
+     * @param sLimit : Superior Limit of the range
+     */
     public Product[] searchProductByStock(int iLimit,int sLimit){
         if(iLimit>sLimit){
             return null;
@@ -277,9 +324,15 @@ public class Controller {
         if((infPos==-1 || supPos==-1) || (infPos>supPos)){
             return null;
         }
-        list = subString(list,infPos,supPos);
+        list = subStringList(list,infPos,supPos);
         return list;
     }
+
+    /**
+     *binarySearchInfStock : returns the position of the product with the inferior limit of the range;
+     * @param stock: inferior limit of the range
+     * @param array : list to search Product
+     */
     private int binarySearchInfStock(int stock, Product[] array){
         int begin = 0;
         int end = array.length-1;
@@ -310,6 +363,11 @@ public class Controller {
         }
         return -2;
     }
+    /**
+     *binarySearchSupStock : returns the position of the product with the Superior limit of the range;
+     * @param stock: Superior limit of the range
+     * @param array : list to search Product
+     */
     private int binarySearchSupStock(int stock, Product[] array){
         int begin = 0;
         int end = array.length-1;
@@ -340,6 +398,11 @@ public class Controller {
         }
         return -2;
     }
+
+    /**
+     * searchProductByCategory: Returns the list of products that correspond with the category indicated
+     * @param category: Category entered
+     */
     public Product[] searchProductByCategory(ProductCategory category){
         Product[] list = new Product[products.size()];
         int cont = 0;
@@ -350,12 +413,18 @@ public class Controller {
             }
         }
         if(cont>0){
-            list = subString(list,0,cont-1);
+            list = subStringList(list,0,cont-1);
         }else{
             return null;
         }
         return list;
     }
+
+    /**
+     * searchProductBySells: returns list pf products that correspond with the sells range entered
+     * @param iLimit : inferior limir of the range
+     * @param sLimit . Superior limit of the range
+     */
     public Product[] searchProductBySells(int iLimit,int sLimit){
         if(iLimit>sLimit){
             return null;
@@ -385,9 +454,15 @@ public class Controller {
         if((infPos==-1 || supPos==-1) || (infPos>supPos)){
             return null;
         }
-        list = subString(list,infPos,supPos);
+        list = subStringList(list,infPos,supPos);
         return list;
     }
+
+    /**
+     * binarySearchInfSells: return the position of the product with the inferior limit of the range
+     * @param sells : inferior limit of the range
+     * @param array : list to search product
+     */
     private int binarySearchInfSells(int sells, Product[] array){
         int begin = 0;
         int end = array.length-1;
@@ -418,6 +493,11 @@ public class Controller {
         }
         return -2;
     }
+    /**
+     * binarySearchSupSells: return the position of the product with the superior limit of the range
+     * @param sells : Superior limit of the range
+     * @param array : list to search product
+     */
     private int binarySearchSupSells(int sells, Product[] array){
         int begin = 0;
         int end = array.length-1;
@@ -448,6 +528,11 @@ public class Controller {
         }
         return -2;
     }
+
+    /**
+     * getOrderByName: returns the list of Orders that correspond to the Customer's name entered
+     * @param name : customer's name
+     */
     public Order[] getOrderByName(String name){
         Order[] order = new Order[orders.size()];
         int cont = 0;
@@ -464,6 +549,11 @@ public class Controller {
         }
         return order;
     }
+
+    /**
+     * searchOrderByPrice: returns the order that corresponds to the price indicate
+     * @param price : Price entered
+     */
     public Order[] searchOrderByPrice(double price){
         Order[] list = getOrders();
         Arrays.sort(list,(a,b) ->{
@@ -490,6 +580,11 @@ public class Controller {
         }
         return null;
     }
+
+    /**
+     * getOrdersByDate: returns the list of orders that correspond with the date indicated
+     * @param date: date entered
+     */
     public Order[] getOrdersByDate(String date){
         Order[] list = new Order[orders.size()];
         int cont = 0;
@@ -508,9 +603,20 @@ public class Controller {
             return null;
         }
     }
+
+    /**
+     * addProductStock: replenishes a product's stock
+     * @param product: product to replenish Stock
+     * @param stock : amount of products adding to the stock
+     */
     public void addProductStock(Product product, int stock){
         product.setStock(stock);
     }
+
+    /**
+     * printList: returns the information of a list of products
+     * @param list: list of products
+     */
     public String printList(Product[] list){
         StringBuilder msj = new StringBuilder();
         int[] sep = calculateSeparations(list);
@@ -523,6 +629,11 @@ public class Controller {
         msj.append("\n\n FOUND "+list.length+" ITEMS");
         return msj.toString();
     }
+
+    /**
+     * printOrder: Prints the information of an order list
+     * @param list: list of orderss
+     */
     public String printOrder(Order[] list){
         StringBuilder msj = new StringBuilder();
         msj.append(" Customer Name | Total Value | Registration Date");
@@ -532,6 +643,11 @@ public class Controller {
         }
         return msj.toString();
     }
+
+    /**
+     * calculateSeparations: calculates the sepparation to arrange the list so it is better looking
+     * @param list: list of products to get informarion
+     */
     private int[] calculateSeparations(Product[] list){
         int[] sep = new int[5];
         int maxName = 0;
@@ -562,6 +678,12 @@ public class Controller {
         sep[3] = maxCategory;
         return sep;
     }
+
+    /**
+     * addSeparation: adds the sepparation to a specific product,
+     * @param p: product to print its information
+     * @param sep: list of the separations of each Atribute of the product
+     */
     private String[] addSeparation(Product p, int[] sep){
         String[] inf = new String[5];
         inf[0] = p.getName();
@@ -596,7 +718,14 @@ public class Controller {
         }
         return inf;
     }
-    private Product[] subString(Product[] list,int inf,int sup){
+
+    /**
+     * subString: returns a divided list depending with the position range entered
+     * @param list: list to divide in sub parts
+     * @param inf: inferior position to divide the list
+     * @param sup: superior position to divide the list
+     */
+    private Product[] subStringList(Product[] list,int inf,int sup){
         Product[] array = new Product[(sup-inf)+1];
         int cont = 0;
         for(int i=inf;i<=sup;i++){
@@ -605,6 +734,13 @@ public class Controller {
         }
         return array;
     }
+
+    /**
+     * subStringOrder: The same as the other one but with orders
+     * @param list: order List
+     * @param inf: inferior limit
+     * @param sup : will someone even read this?
+     */
     private Order[] subStringOrder(Order[] list,int inf,int sup){
         Order[] array = new Order[(sup-inf)+1];
         int cont = 0;
@@ -614,9 +750,19 @@ public class Controller {
         }
         return array;
     }
+
+    /**
+     * addproduct: adds a product to the controller ArrayList of Products
+     * @param product: product to be added
+     */
     public void addProduct(Product product){
         products.add(product);
     }
+
+    /**
+     * deleteProduct: Removes a product from the main ArrayList of products
+     * @param name: name of the product to be removed;
+     */
     public void deleteProduct(String name){
         for(int i=0;i<products.size();i++){
             if((products.get(i).getName().compareToIgnoreCase(name))==0){
@@ -624,6 +770,10 @@ public class Controller {
             }
         }
     }
+    /**
+     * addOrder: adds an order to the controller ArrayList of orders
+     * @param order: order to be added
+     */
     public void addOrder(Order order){
         orders.add(order);
     }

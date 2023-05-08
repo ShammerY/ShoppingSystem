@@ -13,9 +13,13 @@ public class Main {
     }
     public static void main(String[] args) throws IOException, NotFoundException {
         Main main = new Main();
+        main.loadData();
         main.executeProgram();
     }
     private void print(Object t){System.out.println(t);}
+    private void loadData(){
+        controller.loadArchive();
+    }
     public void executeProgram() throws IOException, NotFoundException {
         print(mainMenu());
         switch(reader.next()){
