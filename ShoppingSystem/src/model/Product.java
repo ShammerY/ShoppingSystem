@@ -42,7 +42,7 @@ public class Product implements Comparable<Product>{
     }
 
     public void setStock(int cant) {
-        stock -= cant;
+        stock += cant;
     }
 
     public void setSells(int cant) {

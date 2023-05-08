@@ -1,10 +1,9 @@
+import exceptions.NotFoundException;
 import model.*;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Date;
-import java.util.Scanner;
+import java.util.*;
+
 public class Main {
     private Scanner reader;
     private Controller controller;
@@ -12,17 +11,12 @@ public class Main {
         reader = new Scanner(System.in);
         controller = new Controller();
     }
-    public static void main(String[] args) throws IOException {
+    public static void main(String[] args) throws IOException, NotFoundException {
         Main main = new Main();
         main.executeProgram();
     }
     private void print(Object t){System.out.println(t);}
-    private void clearScanner(){
-        if(reader.nextLine()!=null){
-            return;
-        }
-    }
-    public void executeProgram() throws IOException {
+    public void executeProgram() throws IOException, NotFoundException {
         print(mainMenu());
         switch(reader.next()){
             case "1":
@@ -33,12 +27,16 @@ public class Main {
                 registerOrder();
                 break;
             case "3":
-                print(controller.printList(controller.getProducts()));
-                break;
-            case "4":
                 print(searchProduct());
                 break;
+            case "4":
+                print(searchOrder());
+                break;
             case "5":
+                print(replenishStock());
+                controller.saveProductData();
+                break;
+            case "6":
                 print(deleteProduct());
                 controller.saveProductData();
                 break;
@@ -71,17 +69,20 @@ public class Main {
             return "\n Product Registered Successfully";
         }catch(NumberFormatException ex){
             return "\n ERROR : INVALID INPUT VALUE\n\n Format example:\n" +
-                    "Product::5::20";
+                    "ProductA::5::20";
         }catch(IndexOutOfBoundsException ex){
             return "\n ERROR : NOT ENOUGH INPUT VALUES\n\n Format example:\n" +
-                    "Product::5::12";
+                    "ProductA::5::12";
         }
     }
-    private void registerOrder() throws IOException {
+    private void registerOrder() throws IOException, NotFoundException {
         print("\n Enter Customer Name: ");
         reader.nextLine();
         String customerName = reader.nextLine();
         Product[] list = controller.getProducts();
+        Arrays.sort(list,(a,b)->{
+            return a.getName().compareTo(b.getName());
+        });
         ArrayList<Product> customerList = new ArrayList<>();
         String option;
         do {
@@ -89,9 +90,6 @@ public class Main {
             option = reader.next();
             switch(option){
                 case "1":
-                    Arrays.sort(list,(a,b)->{
-                        return a.getName().compareTo(b.getName());
-                    });
                     customerList = addProductToList(list,customerList);
                     break;
                 case "2":
@@ -107,9 +105,6 @@ public class Main {
                         print("\n Order Discarted");
                     }
                     print("Order Registered");
-                    break;
-                case "0":
-                    print("Order Discarded");
                     break;
                 default:
                     print("\n Invalid Option");
@@ -128,6 +123,7 @@ public class Main {
         }
         customerList.add(list[pos]);
         controller.setProductSellsAndStock(list[pos]);
+        print("\n product Added to order");
         return customerList;
     }
     private String deleteProduct(){
@@ -139,29 +135,135 @@ public class Main {
         controller.deleteProduct(name);
         return "\n Product Deleted Succesfuly";
     }
+    private String replenishStock(){
+        print("Enter product Name");
+        String name = reader.next();
+        Product[] products = controller.getProducts();
+        Arrays.sort(products,(a,b) ->{
+           return a.getName().compareTo(b.getName());
+        });
+        int pos = controller.binarySearchName(name,products);
+        if(pos==-1){
+            return "\n Product Not Found ";
+        }
+        print("\n Enter Stock amount to add :");
+        try{
+            int cant = reader.nextInt();
+            if(cant <1){
+                return "\n Invalid amount : Must be greater than 0";
+            }
+            controller.addProductStock(products[pos],reader.nextInt());
+        }catch(InputMismatchException ex){
+            return "\n Invalid Amount: must be a round number";
+        }
+        return "\n Product replenished successfully";
+    }
     private String searchProduct(){
-        print("\n Search Product by : "+searchMenu());
+        print("\n Search Product by : "+searchProductMenu());
+        Product[] list;
         switch(reader.next()){
             case "1":
-                print("\n Enter product NAME :");
-                return controller.searchProductByName(reader.next());
+                list = controller.getProducts();
+                break;
             case "2":
-                return searchProductByPrice();
+                print("\n Enter product NAME :");
+                list = controller.searchProductByName(reader.next());
+                break;
             case "3":
+                list = searchProductByPrice();
+                break;
+            case "4":
                 print("\n Enter product CATEGORY : "+categoryMenu());
                 ProductCategory category = validateCategory();
                 if(category == null){return "\n Invalid Option";}
-                return controller.searchProductByCategory(category);
-            case "4":
-                return searchProductByStock();
+                list = controller.searchProductByCategory(category);
+                break;
             case "5":
-                return searchProductBySells();
+                list = searchProductByStock();
+                break;
+            case "6":
+                list = searchProductBySells();
+                break;
             default:
                 return "\n Invalid option";
+        }
+        if(list == null){
+            return "\n No Products Found";
+        }
+        return sortList(list);
+    }
+    private String sortList(Product[] list){
+        print("\n Sort List by :"+sortVariableMenu());
+        String value = reader.next();
+        print("\n (1) Acendent\n (2) Descendent");
+        String ascend = reader.next();
+        if(!ascend.equals("1") && !ascend.equals("2")){
+            return "\n Invalid ascending option";
+        }
+        switch(value){
+            case "1":
+                if(ascend.equals("1")){
+                    Arrays.sort(list,(a,b) ->{
+                        return a.getName().compareTo(b.getName());
+                    });
+                }else{
+                    Arrays.sort(list,(a,b) ->{
+                        return (a.getName().compareTo(b.getName()))*-1;
+                    });
+                }
+                break;
+            case "2":
+                if(ascend.equals("1")){
+                    Arrays.sort(list,(a,b) ->{
+                        if((a.getPrice()-b.getPrice())>0){
+                            return 1;
+                        }else if((a.getPrice()-b.getPrice())<0){
+                            return -1;
+                        }else{
+                            return 0;
+                        }
+                    });
+                }else{
+                    Arrays.sort(list,(a,b) ->{
+                        if((a.getPrice()-b.getPrice())>0){
+                            return -1;
+                        }else if((a.getPrice()-b.getPrice())<0){
+                            return 1;
+                        }else{
+                            return 0;
+                        }
+                    });
+                }
+                break;
+            case "3":
+                if(ascend.equals("1")){
+                    Arrays.sort(list,(a,b)->{
+                       return a.getStock() - b.getStock();
+                    });
+                }else{
+                    Arrays.sort(list,(a,b)->{
+                        return (a.getStock() - b.getStock())*-1;
+                    });
+                }
+                break;
+            case "4":
+                if(ascend.equals("1")){
+                    Arrays.sort(list,(a,b)->{
+                        return a.getSells() - b.getSells();
+                    });
+                }else{
+                    Arrays.sort(list,(a,b)->{
+                        return (a.getSells() - b.getSells())*-1;
+                    });
+                }
+                break;
+            default:
+                return "\n Invalid Value option";
 
         }
+        return controller.printList(list);
     }
-    private String searchProductByPrice(){
+    private Product[] searchProductByPrice(){
         print("\n Enter price : \n\nfor ranged search -> (Inferior Limit)::(Superior Limit)");
         String[] input = reader.next().split("::");
         double[] limits = new double[2];
@@ -176,10 +278,11 @@ public class Main {
 
             return controller.searchProductByPrice(limits[0],limits[1]);
         }catch(NumberFormatException ex){
-            return "\n Invalid Price Value\n\nFormat Example:\n 2::10";
+            print("\n Invalid Price Value\n\nFormat Example:\n 2::10");
+            return null;
         }
     }
-    private String searchProductByStock(){
+    private Product[] searchProductByStock(){
         print("\n Enter Stock : \n\nfor ranged search -> (Inferior Limit)::(Superior Limit)");
         String[] input = reader.next().split("::");
         int[] limits = new int[2];
@@ -194,10 +297,11 @@ public class Main {
 
             return controller.searchProductByStock(limits[0],limits[1]);
         }catch(NumberFormatException ex){
-            return "\n Invalid Stock Value\n\nFormat Example:\n 2::10";
+            print("\n Invalid Stock Value\n\nFormat Example:\n 2::10");
+            return null;
         }
     }
-    private String searchProductBySells(){
+    private Product[] searchProductBySells(){
         print("\n Enter Sells : \n\nfor ranged search -> (Inferior Limit)::(Superior Limit)");
         String[] input = reader.next().split("::");
         int[] limits = new int[2];
@@ -212,7 +316,8 @@ public class Main {
 
             return controller.searchProductBySells(limits[0],limits[1]);
         }catch(NumberFormatException ex){
-            return "\n Invalid Sells Value\n\nFormat Example:\n 2::10";
+            print("\n Invalid Sells Value\n\nFormat Example:\n 2::10");
+            return null;
         }
     }
     private ProductCategory validateCategory(){
@@ -245,6 +350,50 @@ public class Main {
         }
         return category;
     }
+    private String searchOrder(){
+        print("\n Search Order by: "+searchOrderMenu());
+        Order[] list;
+        switch(reader.next()){
+            case "1":
+                return controller.printOrder(controller.getOrders());
+            case "2":
+                list = searchOrderByName();
+                break;
+            case "3":
+                list = searchOrderByValue();
+                break;
+            case "4":
+                list = searchOrderByDate();
+                break;
+            default:
+                return "\n Invalid Option";
+        }
+        if(list==null){
+            return "\n No Order Found with this Specification";
+        }
+        return controller.printOrder(list);
+    }
+    private Order[] searchOrderByName(){
+        print("\n Enter Customer Name");
+        String name = reader.next();
+        return controller.getOrderByName(name);
+    }
+    private Order[] searchOrderByValue(){
+        print("\n Enter Order Total Price:");
+        try{
+            double price = reader.nextDouble();
+            Order[] order = controller.searchOrderByPrice(price);
+            return order;
+        }catch(InputMismatchException ex){
+            print("\n Invalid price Value");
+            return null;
+        }
+    }
+    private Order[] searchOrderByDate(){
+        print("\n Enter Date :  day/month/year");
+        String date = reader.next();
+        return controller.getOrdersByDate(date);
+    }
     private String categoryMenu(){
         return  "\n"+
                 "(1) Books\n"+
@@ -256,26 +405,41 @@ public class Main {
                 "(7) Beauty & Self Care\n"+
                 "(8) Games & Toys";
     }
-    private String searchMenu(){
-        return  "\n(1) Name\n"+
+    private String searchProductMenu(){
+        return  "\n(1) List all products\n"+
+                "(2) Name\n"+
+                "(3) Price\n"+
+                "(4) Category\n"+
+                "(5) Available Stock\n"+
+                "(6) Sells";
+    }
+    private String sortVariableMenu(){
+        return  "\n(1) Alphabet\n"+
                 "(2) Price\n"+
-                "(3) Category\n"+
-                "(4) Available Stock\n"+
-                "(5) Sells";
+                "(3) Available Stock\n"+
+                "(4) Sells";
+    }
+    private String searchOrderMenu(){
+        return  "\n(1) list all orders\n"+
+                "(2) Customer name\n"+
+                "(3) Total price\n"+
+                "(4) Registration Date";
+
     }
     private String registerOrderMenu(){
-        return  "\n(1) Add Product"+
+        return  "\n ORDER MENU :"+
+                "\n(1) Add Product"+
                 "\n(2) Search Products"+
-                "\n(3) Save Order"+
-                "\n(0) Discard Order";
+                "\n(3) Save Order";
     }
     private String mainMenu(){
         return  "\n OPTIONS : \n"+
                 "(1) Register Product \n"+
                 "(2) Register Order \n"+
-                "(3) List All Products\n"+
-                "(4) Search Product\n"+
-                "(5) Delete Product\n"+
+                "(3) Search Product\n"+
+                "(4) Search Order\n"+
+                "(5) Replenish product Stock\n"+
+                "(6) Delete Product\n"+
                 "(0) Exit Program";
     }
 }

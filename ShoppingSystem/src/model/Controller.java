@@ -6,7 +6,6 @@ import com.google.gson.Gson;
 import java.util.ArrayList;
 import java.io.*;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.Date;
 
 public class Controller {
@@ -110,12 +109,10 @@ public class Controller {
     }
     public void setProductSellsAndStock(Product product){
         product.setSells(1);
-        product.setStock(1);
+        product.setStock(-1);
     }
-    public String searchProductByName(String name){
-        Product[] list = makeProductListByName(name);
-        if(list[0]==null){return "\n No products Found...";}
-        return printList(list);
+    public Product[] searchProductByName(String name){
+        return makeProductListByName(name);
     }
     private Product[] makeProductListByName(String name){
         Product[] list = new Product[products.size()];
@@ -139,6 +136,8 @@ public class Controller {
         }
         if(cont>0){
             list = subString(list,0,cont-1);
+        }else{
+            return null;
         }
         return list;
     }
@@ -157,9 +156,9 @@ public class Controller {
         }
         return -1;
     }
-    public String searchProductByPrice(double iLimit,double sLimit){
+    public Product[] searchProductByPrice(double iLimit,double sLimit){
         if(iLimit>sLimit){
-            return "\n Invalid input order";
+            return null;
         }
         Product[] list = getProducts();
         Arrays.sort(list,(a,b) ->{
@@ -184,10 +183,10 @@ public class Controller {
             supPos = binarySearchSupPrice(sLimit,list);
         }
         if((infPos==-1 || supPos==-1) || (infPos>supPos)){
-            return "No Product Found...";
+            return null;
         }
         list = subString(list,infPos,supPos);
-        return printList(list);
+        return list;
     }
     private int binarySearchInfPrice(double price, Product[] array){
         int begin = 0;
@@ -249,9 +248,9 @@ public class Controller {
         }
         return -2;
     }
-    public String searchProductByStock(int iLimit,int sLimit){
+    public Product[] searchProductByStock(int iLimit,int sLimit){
         if(iLimit>sLimit){
-            return "\n Invalid input order";
+            return null;
         }
         Product[] list = getProducts();
         Arrays.sort(list,(a,b) ->{
@@ -276,10 +275,10 @@ public class Controller {
             supPos = binarySearchSupStock(sLimit,list);
         }
         if((infPos==-1 || supPos==-1) || (infPos>supPos)){
-            return "\n No products Found...";
+            return null;
         }
         list = subString(list,infPos,supPos);
-        return printList(list);
+        return list;
     }
     private int binarySearchInfStock(int stock, Product[] array){
         int begin = 0;
@@ -341,18 +340,25 @@ public class Controller {
         }
         return -2;
     }
-    public String searchProductByCategory(ProductCategory category){
-        StringBuilder msj = new StringBuilder();
+    public Product[] searchProductByCategory(ProductCategory category){
+        Product[] list = new Product[products.size()];
+        int cont = 0;
         for(Product p:products){
             if(p.getCategory().equals(category)){
-                msj.append("\n"+p.getName()+" : $"+p.getPrice()+" : "+p.getStock()+" : "+p.getCategory()+" : "+p.getSells());
+                list[cont] = p;
+                cont++;
             }
         }
-        return msj.toString();
+        if(cont>0){
+            list = subString(list,0,cont-1);
+        }else{
+            return null;
+        }
+        return list;
     }
-    public String searchProductBySells(int iLimit,int sLimit){
+    public Product[] searchProductBySells(int iLimit,int sLimit){
         if(iLimit>sLimit){
-            return "\n Invalid input order";
+            return null;
         }
         Product[] list = getProducts();
         Arrays.sort(list,(a,b) ->{
@@ -377,10 +383,10 @@ public class Controller {
             supPos = binarySearchSupSells(sLimit,list);
         }
         if((infPos==-1 || supPos==-1) || (infPos>supPos)){
-            return "\n No products Found...";
+            return null;
         }
         list = subString(list,infPos,supPos);
-        return printList(list);
+        return list;
     }
     private int binarySearchInfSells(int sells, Product[] array){
         int begin = 0;
@@ -442,6 +448,69 @@ public class Controller {
         }
         return -2;
     }
+    public Order[] getOrderByName(String name){
+        Order[] order = new Order[orders.size()];
+        int cont = 0;
+        for(Order o:orders){
+            if(o.getCustomerName().equals(name)){
+                order[cont] = o;
+                cont++;
+            }
+        }
+        if(cont>0){
+            order = subStringOrder(order,0,cont-1);
+        }else{
+            return null;
+        }
+        return order;
+    }
+    public Order[] searchOrderByPrice(double price){
+        Order[] list = getOrders();
+        Arrays.sort(list,(a,b) ->{
+           if((a.getValue() - b.getValue())>0){
+               return 1;
+           }else if((a.getValue() - b.getValue())<0){
+               return -1;
+           }else{
+               return 0;
+           }
+        });
+        int begin = 0;
+        int end = list.length-1;
+        while(begin <= end){
+            int half = (int)Math.floor((double)(begin+end)/2);
+            if((list[half].getValue() - price)==0){
+                Order[] array = {list[half]};
+                return array;
+            }else if((list[half].getValue() - price)<0){
+                begin = half+1;
+            }else{
+                end = half-1;
+            }
+        }
+        return null;
+    }
+    public Order[] getOrdersByDate(String date){
+        Order[] list = new Order[orders.size()];
+        int cont = 0;
+        for(Order o:orders){
+            Date dt = o.getDate();
+            String orderDate = dt.getDate()+"/"+(dt.getMonth()+1)+"/"+(dt.getYear()+1900);
+            if(orderDate.equals(date)){
+                list[cont] = o;
+                cont++;
+            }
+        }
+        if(cont>0){
+            list = subStringOrder(list,0,cont-1);
+            return list;
+        }else{
+            return null;
+        }
+    }
+    public void addProductStock(Product product, int stock){
+        product.setStock(stock);
+    }
     public String printList(Product[] list){
         StringBuilder msj = new StringBuilder();
         int[] sep = calculateSeparations(list);
@@ -452,6 +521,15 @@ public class Controller {
             msj.append("\n"+inf[0]+" : $"+inf[1]+" : "+inf[2]+" : "+inf[3]+" : "+inf[4]);
         }
         msj.append("\n\n FOUND "+list.length+" ITEMS");
+        return msj.toString();
+    }
+    public String printOrder(Order[] list){
+        StringBuilder msj = new StringBuilder();
+        msj.append(" Customer Name | Total Value | Registration Date");
+        for(Order o:list){
+            Date date = o.getDate();
+            msj.append("\n"+o.getCustomerName()+" : "+o.getValue()+" : "+(date.getDate()+"/"+(date.getMonth()+1)+"/"+(date.getYear()+1900)));
+        }
         return msj.toString();
     }
     private int[] calculateSeparations(Product[] list){
@@ -520,6 +598,15 @@ public class Controller {
     }
     private Product[] subString(Product[] list,int inf,int sup){
         Product[] array = new Product[(sup-inf)+1];
+        int cont = 0;
+        for(int i=inf;i<=sup;i++){
+            array[cont] = list[i];
+            cont++;
+        }
+        return array;
+    }
+    private Order[] subStringOrder(Order[] list,int inf,int sup){
+        Order[] array = new Order[(sup-inf)+1];
         int cont = 0;
         for(int i=inf;i<=sup;i++){
             array[cont] = list[i];

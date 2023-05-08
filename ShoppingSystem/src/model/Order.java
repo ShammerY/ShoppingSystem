@@ -26,7 +26,7 @@ public class Order {
         return products;
     }
     public double getValue() {
-        return value;
+        return Math.round(value);
     }
     private double calculateValue(){
         double total = 0;
