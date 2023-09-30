@@ -1,10 +1,10 @@
 ## EXAMPLE:
 
-## $\text{ANOTHER ONE BITES THE DUST}$
+## ANOTHER ONE BITES THE DUST
 
 ### ANOTHER ONE BITES THE DUST
 
-# $$\text{ANOTHER ONE BITES THE DUST}$$
+# $$ANOTHER ONE BITES THE DUST$$
 Input lists:
 
 $$Ranges = [(0,5),(-3,2),(7,10),(-8,3),(12,15),(5,9),(2,11),(-5,6),(8,13)]$$
